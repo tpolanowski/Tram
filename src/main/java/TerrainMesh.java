@@ -29,9 +29,9 @@ public class TerrainMesh {
                 vertexBuffer.put(((float) x) * spacing + offset.x);
                 vertexBuffer.put(heightMap[x][z] + offset.y);
                 vertexBuffer.put(((float) z) * spacing + offset.z);
-                colorBuffer.put(1);
-                colorBuffer.put(1);
-                colorBuffer.put(1);
+                colorBuffer.put(0.4f);
+                colorBuffer.put(0.7f);
+                colorBuffer.put(0.3f);
 
                 if (x > 0 && z > 0) {
                     indexBuffer.put(z + (x * heightMap[0].length));

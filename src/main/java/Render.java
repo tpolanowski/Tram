@@ -13,10 +13,10 @@ public class Render implements GLEventListener{
 
     private DisplayManager dm;
     private TerrainMesh terrain;
-    
+
     public Render(DisplayManager dm) {
         this.dm = dm;
-        float[][] hMap = new float[20][20];
+        float[][] hMap = new float[40][40];
         terrain = new TerrainMesh(hMap
                                  ,25
                                  ,new Vector3D(-25 * (hMap.length / 2f)
@@ -52,15 +52,15 @@ public class Render implements GLEventListener{
                   ,drawable.getWidth() / 2
                   ,drawable.getHeight() / 2
                   ,drawable.getHeight() / -2
-                  ,-500
-                  ,500
+                  ,50
+                  ,1000000
                   );
         gl.glMatrixMode(GLMatrixFunc.GL_MODELVIEW);
         gl.glLoadIdentity();
         dm.getCamera().translate(gl);
 
         // rendering
-        gl.glPolygonMode(GL2.GL_FRONT_AND_BACK, GL2.GL_LINE);
+        //gl.glPolygonMode(GL2.GL_FRONT_AND_BACK, GL2.GL_LINE);
 
 //        gl.glBegin(GL.GL_TRIANGLES);
 //        gl.glColor3f(0f, 1f, 0f);
