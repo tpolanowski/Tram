@@ -1,16 +1,29 @@
+import com.jogamp.common.nio.Buffers;
+
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLEventListener;
 import javax.media.opengl.fixedfunc.GLMatrixFunc;
 import java.awt.*;
+import java.nio.ByteBuffer;
+import java.nio.FloatBuffer;
 
 public class Render implements GLEventListener{
 
     private DisplayManager dm;
-
+    private TerrainMesh terrain;
+    
     public Render(DisplayManager dm) {
         this.dm = dm;
+        float[][] hMap = new float[20][20];
+        terrain = new TerrainMesh(hMap
+                                 ,25
+                                 ,new Vector3D(-25 * (hMap.length / 2f)
+                                               ,0
+                                               ,-25 * (hMap[0].length / 2f)
+                                               )
+                                 );
     }
 
     @Override
@@ -47,15 +60,25 @@ public class Render implements GLEventListener{
         dm.getCamera().translate(gl);
 
         // rendering
-        //gl.glPolygonMode(GL2.GL_FRONT_AND_BACK, GL2.GL_LINE);
-        gl.glBegin(GL.GL_TRIANGLES);
-        gl.glColor3f(1f, 0f, 0f);
-        gl.glVertex3f(150f, 150f, -20f);
-        gl.glColor3f(0f, 1f, 0f);
-        gl.glVertex3f(-200f, 0f, -20f);
-        gl.glColor3f(0f, 0f, 1f);
-        gl.glVertex3f(0f, -200f, -20f);
-        gl.glEnd();
+        gl.glPolygonMode(GL2.GL_FRONT_AND_BACK, GL2.GL_LINE);
+
+//        gl.glBegin(GL.GL_TRIANGLES);
+//        gl.glColor3f(0f, 1f, 0f);
+//        gl.glVertex3f(150f, 150f, -20f);
+//        gl.glColor3f(0f, 1f, 0f);
+//        gl.glVertex3f(-200f, 0f, -20f);
+//        gl.glColor3f(0f, 0f, 1f);
+//        gl.glVertex3f(0f, -200f, -20f);
+//        gl.glEnd();
+
+        gl.glEnableClientState(GL2.GL_VERTEX_ARRAY);
+        gl.glVertexPointer(3, GL.GL_FLOAT, 0, terrain.getVertexBuffer());
+        gl.glEnableClientState(GL2.GL_COLOR_ARRAY);
+        gl.glColorPointer(3, GL.GL_FLOAT, 0, terrain.getColorBuffer());
+        gl.glDrawElements(GL.GL_TRIANGLES, terrain.getIndexCount(), GL2.GL_UNSIGNED_INT, terrain.getIndexBuffer());
+        gl.glDisableClientState(GL2.GL_VERTEX_ARRAY);
+        gl.glDisableClientState(GL2.GL_COLOR_ARRAY);
+
 
     }
 
