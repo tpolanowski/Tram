@@ -7,7 +7,7 @@ import java.awt.*;
 
 public class DisplayManager {
 
-    private static final int MAX_FPS = 50;
+    private static final int MAX_FPS = 60;
     private final GLCanvas canvas;
     private final GLProfile profile;
     private final GLCapabilities caps;
