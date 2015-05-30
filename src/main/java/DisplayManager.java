@@ -13,6 +13,7 @@ public class DisplayManager {
     private final GLCapabilities caps;
     private final FPSAnimator animator;
     private final Render render;
+    private final Camera cam;
 
     public DisplayManager() {
         GLProfile.initSingleton();
@@ -22,11 +23,17 @@ public class DisplayManager {
         render = new Render(this);
         canvas.addGLEventListener(render);
         animator = new FPSAnimator(MAX_FPS);
+        cam = new Camera();
+        canvas.addKeyListener(cam);
         animator.add(canvas);
     }
 
     public Component getGLCanvas() {
         return canvas;
+    }
+
+    public Camera getCamera(){
+        return cam;
     }
 
     public void start() {

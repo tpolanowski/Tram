@@ -16,10 +16,10 @@ public class Render implements GLEventListener{
     @Override
     public void init(GLAutoDrawable drawable) {
         GL2 gl = drawable.getGL().getGL2();
-        gl.glEnable(GL.GL_DEPTH_TEST);
-        gl.glEnable(GL2.GL_LIGHTING);
-        gl.glEnable(GL2.GL_LIGHT0);
-        gl.glEnable(GL2.GL_COLOR_MATERIAL);
+//        gl.glEnable(GL.GL_DEPTH_TEST);
+//        gl.glEnable(GL2.GL_LIGHTING);
+//        gl.glEnable(GL2.GL_LIGHT0);
+//        gl.glEnable(GL2.GL_COLOR_MATERIAL);
     }
 
     @Override
@@ -44,6 +44,7 @@ public class Render implements GLEventListener{
                   );
         gl.glMatrixMode(GLMatrixFunc.GL_MODELVIEW);
         gl.glLoadIdentity();
+        dm.getCamera().translate(gl);
 
         // rendering
         //gl.glPolygonMode(GL2.GL_FRONT_AND_BACK, GL2.GL_LINE);
