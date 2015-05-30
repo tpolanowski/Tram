@@ -10,8 +10,11 @@ public class Tram extends JFrame {
         setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 
         dm = new DisplayManager();
-
+        dm.getGLCanvas().setSize(1280, 720);
+        dm.getGLCanvas().setLocation(0, 0);
+        add(dm.getGLCanvas());
         setVisible(true);
+        dm.start();
     }
 
     @Override
