@@ -5,7 +5,10 @@ import javax.media.opengl.GL2;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLEventListener;
 import javax.media.opengl.fixedfunc.GLMatrixFunc;
+import javax.media.opengl.glu.GLU;
 import java.awt.*;
+import java.io.File;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 
@@ -13,6 +16,8 @@ public class Render implements GLEventListener{
 
     private DisplayManager dm;
     private TerrainMesh terrain;
+    private boolean[][] path;
+    private float s;
 
     public Render(DisplayManager dm) {
         this.dm = dm;
@@ -24,15 +29,26 @@ public class Render implements GLEventListener{
                                                ,-25 * (hMap[0].length / 2f)
                                                )
                                  );
+        try {
+            path = PathLoader.loadPath(new File("path.png"));
+        }
+        catch(IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
     public void init(GLAutoDrawable drawable) {
         GL2 gl = drawable.getGL().getGL2();
-//        gl.glEnable(GL.GL_DEPTH_TEST);
-//        gl.glEnable(GL2.GL_LIGHTING);
-//        gl.glEnable(GL2.GL_LIGHT0);
-//        gl.glEnable(GL2.GL_COLOR_MATERIAL);
+        gl.glClearColor(0.0f, 0.0f, 0.0f, 1.0f); // Set background color to black and opaque
+        gl.glClearDepth(1.0f);                   // Set background depth to farthest
+        gl.glEnable(gl.GL_DEPTH_TEST);   // Enable depth testing for z-culling
+        gl.glDepthFunc(gl.GL_LEQUAL);    // Set the type of depth-test
+        gl.glShadeModel(gl.GL_SMOOTH);   // Enable smooth shading
+        gl.glHint(gl.GL_PERSPECTIVE_CORRECTION_HINT, gl.GL_NICEST);  // Nice perspective corrections
+        //gl.glEnable(GL2.GL_LIGHTING);
+        //gl.glEnable(GL2.GL_LIGHT0);
+        gl.glEnable(GL2.GL_COLOR_MATERIAL);
     }
 
     @Override
@@ -43,6 +59,8 @@ public class Render implements GLEventListener{
     @Override
     public void display(GLAutoDrawable drawable) {
         GL2 gl = drawable.getGL().getGL2();
+        GLU glu = GLU.createGLU(gl);
+
         gl.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
 
         // world projection
@@ -52,25 +70,18 @@ public class Render implements GLEventListener{
                   ,drawable.getWidth() / 2
                   ,drawable.getHeight() / 2
                   ,drawable.getHeight() / -2
-                  ,50
-                  ,1000000
+                  ,100000
+                  ,1
                   );
+
         gl.glMatrixMode(GLMatrixFunc.GL_MODELVIEW);
         gl.glLoadIdentity();
         dm.getCamera().translate(gl);
 
         // rendering
-        //gl.glPolygonMode(GL2.GL_FRONT_AND_BACK, GL2.GL_LINE);
+        gl.glPolygonMode(GL2.GL_FRONT_AND_BACK, GL2.GL_LINE);
 
-//        gl.glBegin(GL.GL_TRIANGLES);
-//        gl.glColor3f(0f, 1f, 0f);
-//        gl.glVertex3f(150f, 150f, -20f);
-//        gl.glColor3f(0f, 1f, 0f);
-//        gl.glVertex3f(-200f, 0f, -20f);
-//        gl.glColor3f(0f, 0f, 1f);
-//        gl.glVertex3f(0f, -200f, -20f);
-//        gl.glEnd();
-
+        // terrain
         gl.glEnableClientState(GL2.GL_VERTEX_ARRAY);
         gl.glVertexPointer(3, GL.GL_FLOAT, 0, terrain.getVertexBuffer());
         gl.glEnableClientState(GL2.GL_COLOR_ARRAY);
@@ -80,10 +91,33 @@ public class Render implements GLEventListener{
         gl.glDisableClientState(GL2.GL_COLOR_ARRAY);
 
 
+
+        // update
+        update(gl);
     }
 
     @Override
     public void reshape(GLAutoDrawable drawable, int x, int y, int width, int height) {
 
+    }
+
+    private void update(GL2 gl) {
+        s += 0.01;
+        drawTram(gl);
+    }
+
+    private void drawTram(GL2 gl) {
+        // test - triangle
+        gl.glPolygonMode(GL2.GL_FRONT_AND_BACK, GL2.GL_FILL);
+        gl.glPushMatrix();
+        gl.glBegin(gl.GL_TRIANGLES);
+        gl.glColor3f(1.0f, 0.0f, 0.0f); // Red
+        gl.glVertex3f(0.0f, -1.0f, -2.0f*s);
+        gl.glColor3f(0.0f, 1.0f, 0.0f); // Green
+        gl.glVertex3f(-1.0f, 0.0f, 2.0f*-s);
+        gl.glColor3f(0.0f, 1.0f, 1.0f); // Cyan
+        gl.glVertex3f(1.0f, 0.0f, 2.0f*-s);
+        gl.glEnd();
+        gl.glPopMatrix();
     }
 }
