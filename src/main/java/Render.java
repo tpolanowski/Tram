@@ -11,12 +11,14 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
+import java.util.ArrayList;
 
 public class Render implements GLEventListener{
 
     private DisplayManager dm;
     private TerrainMesh terrain;
-    private boolean[][] path;
+    private boolean[][] mapping;
+    private ArrayList<Coord> path;
     private float s;
 
     public Render(DisplayManager dm) {
@@ -30,7 +32,8 @@ public class Render implements GLEventListener{
                                                )
                                  );
         try {
-            path = PathLoader.loadPath(new File("path.png"));
+            mapping = PathLoader.loadPath(new File("path.png"));
+            path = PathLoader.orderPath(mapping);
         }
         catch(IOException e) {
             e.printStackTrace();
