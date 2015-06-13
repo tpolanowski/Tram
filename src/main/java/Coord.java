@@ -12,9 +12,23 @@ public class Coord {
         y = coord.getY();
     }
 
+    public void set(Coord coord) {
+        x = coord.getX();
+        y = coord.getY();
+    }
+
     @Override
     public String toString() {
         return "[" + x + "," + y + "]";
+    }
+
+    public boolean equals(Coord coord) {
+        if (x == coord.getX() && y == coord.getY()) {
+            return true;
+        }
+        else {
+           return false;
+        }
     }
 
     public int getX() {

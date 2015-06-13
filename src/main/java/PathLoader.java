@@ -44,7 +44,7 @@ public class PathLoader {
             }
         }
 
-        // test the array
+        // test array as img
         System.out.println("First element found at: " + first.toString());
         BufferedImage img = new BufferedImage(mapping.length, mapping[0].length, BufferedImage.TYPE_INT_ARGB);
         File file = null;
@@ -69,16 +69,65 @@ public class PathLoader {
         Coord previous = new Coord(first);
 
         path.add(first);
-        img.setRGB(first.getY(), first.getX()-1, new Color(0,255,0).getRGB());
-//        if (mapping[][]) {
-//
-//        } else if (mapping[][]) {
-//
-//        }
 
+        if (mapping[current.getY()][current.getX()+1]) {
+            previous.set(current);
+            current.setX(current.getX()+1);
+        } else if (mapping[current.getY()-1][current.getX()+1]) {
+            previous.set(current);
+            current.setX(current.getX()+1);
+            current.setY(current.getY()-1);
+        } else if (mapping[current.getY()+1][current.getX()+1]) {
+            previous.set(current);
+            current.setX(current.getX()+1);
+            current.setY(current.getY()+1);
+        }
+        path.add(current);
+        img.setRGB(current.getY(), current.getX(), new Color(0,255,0).getRGB());
 
-        while(current.getX() != first.getX() && current.getY() != first.getY() ) {
-            break;
+        while(!current.equals(first)) {
+            System.out.println("while: current: " + current.toString() + "previous: " + previous.toString());
+            Coord[] candidates = new Coord[8];
+            for (int i = 0; i<8; i++){
+                candidates[i] = new Coord();
+            }
+            // SW
+            candidates[0].setX(current.getX() - 1);
+            candidates[0].setY(current.getY() - 1);
+            // S
+            candidates[1].setX(current.getX());
+            candidates[1].setY(current.getY() - 1);
+            // SE
+            candidates[2].setX(current.getX() + 1);
+            candidates[2].setY(current.getY() - 1);
+            // E
+            candidates[3].setX(current.getX() + 1);
+            candidates[3].setY(current.getY());
+            // NE
+            candidates[4].setX(current.getX() + 1);
+            candidates[4].setY(current.getY() + 1);
+            // N
+            candidates[5].setX(current.getX());
+            candidates[5].setY(current.getY() + 1);
+            // NW
+            candidates[6].setX(current.getX() - 1);
+            candidates[6].setY(current.getY() + 1);
+            // W
+            candidates[7].setX(current.getX() - 1);
+            candidates[7].setY(current.getY());
+
+            for (Coord candidate : candidates) {
+                if (mapping[candidate.getY()][candidate.getX()]) {
+                    if (!candidate.equals(previous)) {
+                        System.out.println("FOUND MATCH, candidate:" + candidate.toString() + "previous: " + previous.toString());
+                        previous.set(current);
+                        current.set(candidate);
+                        path.add(current);
+                        img.setRGB(current.getY(), current.getX(), new Color(0,255,0).getRGB());
+                        break;
+                    }
+                }
+            }
         }
 
 
