@@ -19,16 +19,16 @@ public class Render implements GLEventListener{
     private TerrainMesh terrain;
     private boolean[][] mapping;
     private ArrayList<Coord> path;
-    private float s;
+    private int t = 0;
 
     public Render(DisplayManager dm) {
         this.dm = dm;
         float[][] hMap = new float[40][40];
         terrain = new TerrainMesh(hMap
-                                 ,25
-                                 ,new Vector3D(-25 * (hMap.length / 2f)
+                                 ,30
+                                 ,new Vector3D( (hMap.length / 2f -150f)
                                                ,0
-                                               ,-25 * (hMap[0].length / 2f)
+                                               ,(hMap[0].length / 2f -80f)
                                                )
                                  );
         try {
@@ -81,10 +81,12 @@ public class Render implements GLEventListener{
         gl.glLoadIdentity();
         dm.getCamera().translate(gl);
 
-        // rendering
-        gl.glPolygonMode(GL2.GL_FRONT_AND_BACK, GL2.GL_LINE);
+        // map position corrections
+        gl.glRotatef(90f, 0, 1, 0);
+        gl.glTranslatef(-500, 0, -500);
 
         // terrain
+        gl.glPolygonMode(GL2.GL_FRONT_AND_BACK, GL2.GL_LINE);
         gl.glEnableClientState(GL2.GL_VERTEX_ARRAY);
         gl.glVertexPointer(3, GL.GL_FLOAT, 0, terrain.getVertexBuffer());
         gl.glEnableClientState(GL2.GL_COLOR_ARRAY);
@@ -93,7 +95,8 @@ public class Render implements GLEventListener{
         gl.glDisableClientState(GL2.GL_VERTEX_ARRAY);
         gl.glDisableClientState(GL2.GL_COLOR_ARRAY);
 
-
+        // road
+        drawTramRoad(gl, 4f);
 
         // update
         update(gl);
@@ -105,22 +108,51 @@ public class Render implements GLEventListener{
     }
 
     private void update(GL2 gl) {
-        s += 0.01;
+        t++;
+        if (t == path.size()) {
+            t = 0;
+        }
         drawTram(gl);
     }
 
     private void drawTram(GL2 gl) {
+        // tram
+        gl.glPolygonMode(GL2.GL_FRONT_AND_BACK, GL2.GL_FILL);
+        gl.glPushMatrix();
+        gl.glBegin(gl.GL_TRIANGLES);
+
         // test - triangle
+        System.out.println("t: " + t + " tram at: " + path.get(t).toString());
         gl.glPolygonMode(GL2.GL_FRONT_AND_BACK, GL2.GL_FILL);
         gl.glPushMatrix();
         gl.glBegin(gl.GL_TRIANGLES);
         gl.glColor3f(1.0f, 0.0f, 0.0f); // Red
-        gl.glVertex3f(0.0f, -1.0f, -2.0f*s);
+        gl.glVertex3f(path.get(t).getX()+0.0f, -1.0f, path.get(t).getY()-20.0f);
         gl.glColor3f(0.0f, 1.0f, 0.0f); // Green
-        gl.glVertex3f(-1.0f, 0.0f, 2.0f*-s);
+        gl.glVertex3f(path.get(t).getX()-10.0f, 0.0f, path.get(t).getY()+20.0f);
         gl.glColor3f(0.0f, 1.0f, 1.0f); // Cyan
-        gl.glVertex3f(1.0f, 0.0f, 2.0f*-s);
+        gl.glVertex3f(path.get(t).getX()+10.0f, 0.0f, path.get(t).getY()+20.0f);
         gl.glEnd();
+        gl.glPopMatrix();
+    }
+
+    private void drawTramRoad(GL2 gl, float size) {
+        gl.glPolygonMode(GL2.GL_FRONT_AND_BACK, GL2.GL_FILL);
+        gl.glPushMatrix();
+
+        for(Coord coord : path) {
+            gl.glBegin(gl.GL_QUADS);
+            gl.glColor3f(0.6f, 0.6f, 0.6f); // Gray
+            gl.glVertex3f(coord.getX()+size,0f,coord.getY()+size);
+            gl.glColor3f(0.6f, 0.6f, 0.6f); // Gray
+            gl.glVertex3f(coord.getX()+size,0f,coord.getY()-size);
+            gl.glColor3f(0.6f, 0.6f, 0.6f); // Gray
+            gl.glVertex3f(coord.getX()-size,0f,coord.getY()-size);
+            gl.glColor3f(0.6f, 0.6f, 0.6f); // Gray
+            gl.glVertex3f(coord.getX()-size,0f,coord.getY()+size);
+            gl.glEnd();
+        }
+
         gl.glPopMatrix();
     }
 }

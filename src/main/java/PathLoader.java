@@ -122,14 +122,13 @@ public class PathLoader {
                         System.out.println("FOUND MATCH, candidate:" + candidate.toString() + "previous: " + previous.toString());
                         previous.set(current);
                         current.set(candidate);
-                        path.add(current);
+                        path.add(new Coord(current));
                         img.setRGB(current.getY(), current.getX(), new Color(0,255,0).getRGB());
                         break;
                     }
                 }
             }
         }
-
 
         try {
             file = new File("array.png");
@@ -138,7 +137,6 @@ public class PathLoader {
         catch(IOException e) {
             e.printStackTrace();
         }
-        // 3. GO
 
         return path;
     }
