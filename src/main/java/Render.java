@@ -20,6 +20,7 @@ public class Render implements GLEventListener{
     private boolean[][] mapping;
     private ArrayList<Coord> path;
     private int t = 0;
+    private float tramAngle = 162f; // starting tram angle
 
     public Render(DisplayManager dm) {
         this.dm = dm;
@@ -101,18 +102,6 @@ public class Render implements GLEventListener{
         // update
         update(gl);
 
-        //test
-        gl.glPushMatrix();
-        //gl.glRotatef(90,0,1,0);
-        gl.glBegin(gl.GL_TRIANGLES);
-        gl.glColor3f(1.0f, 0.0f, 0.0f); // Red
-        gl.glVertex3f(0.0f, -1.0f, -20.0f);
-        gl.glColor3f(0.0f, 1.0f, 0.0f); // Green
-        gl.glVertex3f(-10.0f, 0.0f, 20.0f);
-        gl.glColor3f(0.0f, 1.0f, 1.0f); // Cyan
-        gl.glVertex3f(10.0f, 0.0f, 20.0f);
-        gl.glEnd();
-        gl.glPopMatrix();
     }
 
     @Override
@@ -125,9 +114,9 @@ public class Render implements GLEventListener{
         if (t == path.size()) {
             t = 0;
         }
-        drawTram(gl,0.04f);
+        drawTramFront(gl,0.04f);
 
-        drawTest2(gl);
+
 
 
     }
@@ -168,16 +157,9 @@ public class Render implements GLEventListener{
         gl.glPolygonMode(GL2.GL_FRONT_AND_BACK, GL2.GL_FILL);
         gl.glPushMatrix();
 
-
-        float[] f = new float[16];
-        gl.glGetFloatv(gl.GL_MODELVIEW_MATRIX, f, 0);
-        System.out.println("MV");
-        for (int i = 0; i < 16; i++)
-        { System.out.print(" " + f[i]); if (i % 4 == 3) System.out.println(); }
-
         gl.glTranslatef(path.get(t).getX(), 0, path.get(t).getY());
-        gl.glRotatef(90,0,1,0);
-       //gl.glTranslatef(-path.get(t).getX(), 0, -path.get(t).getY());
+        gl.glRotatef(130,0,1,0);
+
         gl.glBegin(gl.GL_TRIANGLES);
         gl.glColor3f(1.0f, 0.0f, 0.0f); // Red
         gl.glVertex3f( + 0.0f, -1.0f,- 20.0f);
@@ -190,23 +172,41 @@ public class Render implements GLEventListener{
         gl.glPopMatrix();
     }
 
-    private void drawTram(GL2 gl, float s) {
+    private void drawTramFront(GL2 gl, float s) {
         int x = path.get(t).getX();
         int y = path.get(t).getY();
 
         //gl.glPolygonMode(GL2.GL_FRONT_AND_BACK, GL2.GL_LINE);
         gl.glPushMatrix();
 
-        //gl.glRotatef(90,0,1,0);
+        // move the tram
+        gl.glTranslatef(x, 0, y);
+
+        // rotate the tram accordingly to the railroad
+        if (t > 20) {
+            Coord prev = new Coord(path.get(t-20));
+            int deltaY = prev.getY() - y;
+            int deltaX = prev.getX() - x;
+
+            float angle = (float) Math.toDegrees(Math.atan2(deltaY, deltaX));
+            System.out.println(200-angle);
+            gl.glRotatef(tramAngle+200-angle,0,1,0);
+        }
+        else {
+            tramAngle = 162f;
+            gl.glRotatef(tramAngle,0,1,0);
+        }
+
+
 
         gl.glColor3f(0.1f, 0.2f, 1f); // Dark Blue
 
         // front window
         gl.glBegin(gl.GL_QUADS);
-        gl.glVertex3f(x+300*s, -600*s, y);
-        gl.glVertex3f(x, -200*s, y);
-        gl.glVertex3f(x, -200*s, y-200*s);
-        gl.glVertex3f(x+300*s, -600*s, y-200*s);
+        gl.glVertex3f(300*s, -600*s, 0);
+        gl.glVertex3f(0, -200*s, 0);
+        gl.glVertex3f(0, -200*s, -200*s);
+        gl.glVertex3f(300*s, -600*s, -200*s);
         gl.glEnd();
 
         gl.glColor3f(0.6f, 0.7f, 1f); // Light Blue
@@ -215,119 +215,119 @@ public class Render implements GLEventListener{
 
         // front window glass
         gl.glBegin(gl.GL_QUADS);
-        gl.glVertex3f(x+(300-r)*s, (-600+r)*s, y-r*s);
+        gl.glVertex3f((300-r)*s, (-600+r)*s, -r*s);
         gl.glColor3f(0.4f, 0.6f, 0.9f); // Light Blue Tint 1
-        gl.glVertex3f(x, -200*s, y-r*s);
+        gl.glVertex3f(0, -200*s, -r*s);
         gl.glColor3f(0.4f, 0.8f, 1.0f); // Light Blue Tint 2
-        gl.glVertex3f(x, -200*s, y+(-200+r)*s);
-        gl.glVertex3f(x+(300-r)*s, (-600+r)*s, y+(-200+r)*s);
+        gl.glVertex3f(0, -200*s, (-200+r)*s);
+        gl.glVertex3f((300-r)*s, (-600+r)*s, (-200+r)*s);
         gl.glEnd();
 
         gl.glColor3f(0.1f, 0.2f, 1f); // Dark Blue
 
         // front - right window
         gl.glBegin(gl.GL_TRIANGLES);
-        gl.glVertex3f(x,-200*s,y);
-        gl.glVertex3f(x+300*s,-200*s,y);
-        gl.glVertex3f(x+300*s,-600*s,y);
+        gl.glVertex3f(0,-200*s,0);
+        gl.glVertex3f(300*s,-200*s,0);
+        gl.glVertex3f(300*s,-600*s,0);
         gl.glEnd();
 
         // front - left window
         gl.glBegin(gl.GL_TRIANGLES);
-        gl.glVertex3f(x,-200*s,y-200*s);
-        gl.glVertex3f(x+300*s,-200*s,y-200*s);
-        gl.glVertex3f(x+300*s,-600*s,y-200*s);
+        gl.glVertex3f(0,-200*s,-200*s);
+        gl.glVertex3f(300*s,-200*s,-200*s);
+        gl.glVertex3f(300*s,-600*s,-200*s);
         gl.glEnd();
 
         // front - right window glass
         gl.glBegin(gl.GL_TRIANGLES);
         gl.glColor3f(0.6f, 0.7f, 1f); // Light Blue
-        gl.glVertex3f(x+r*s,-200*s,y+0.1f*s);
+        gl.glVertex3f(r*s,-200*s,0.1f*s);
         gl.glColor3f(0.4f, 0.6f, 0.9f); // Light Blue Tint 1
-        gl.glVertex3f(x+(300-r)*s,-200*s,y+0.1f*s);
+        gl.glVertex3f((300-r)*s,-200*s,0.1f*s);
         gl.glColor3f(0.4f, 0.8f, 1.0f); // Light Blue Tint 2
-        gl.glVertex3f(x+(300-r)*s,(-600+2*r)*s,y+0.1f*s);
+        gl.glVertex3f((300-r)*s,(-600+2*r)*s,0.1f*s);
         gl.glEnd();
 
         // front - left window glass
         gl.glBegin(gl.GL_TRIANGLES);
         gl.glColor3f(0.6f, 0.7f, 1f); // Light Blue
-        gl.glVertex3f(x+r*s,-200*s,y-200.1f*s);
+        gl.glVertex3f(r*s,-200*s,-200.1f*s);
         gl.glColor3f(0.4f, 0.6f, 0.9f); // Light Blue Tint 1
-        gl.glVertex3f(x+(300-r)*s,-200*s,y-200.1f*s);
+        gl.glVertex3f((300-r)*s,-200*s,-200.1f*s);
         gl.glColor3f(0.4f, 0.8f, 1.0f); // Light Blue Tint 2
-        gl.glVertex3f(x+(300-r)*s,(-600+2*r)*s,y-200.1f*s);
+        gl.glVertex3f((300-r)*s,(-600+2*r)*s,-200.1f*s);
         gl.glEnd();
 
         gl.glColor3f(0.1f, 0.2f, 1f); // Dark Blue
 
         // front
         gl.glBegin(gl.GL_QUADS);
-        gl.glVertex3f(x,0,y);
-        gl.glVertex3f(x, -200*s,y);
-        gl.glVertex3f(x, -200*s,y-200*s);
-        gl.glVertex3f(x,0,y-200*s);
+        gl.glVertex3f(0,0,0);
+        gl.glVertex3f(0, -200*s,0);
+        gl.glVertex3f(0, -200*s,-200*s);
+        gl.glVertex3f(0,0,-200*s);
         gl.glEnd();
 
         // front - back wall
         gl.glBegin(gl.GL_QUADS);
-        gl.glVertex3f(x+300*s,0,y);
-        gl.glVertex3f(x+300*s,-600*s,y);
-        gl.glVertex3f(x+300*s,-600*s,y-200*s);
-        gl.glVertex3f(x+300*s,0,y-200*s);
+        gl.glVertex3f(300*s,0,0);
+        gl.glVertex3f(300*s,-600*s,0);
+        gl.glVertex3f(300*s,-600*s,-200*s);
+        gl.glVertex3f(300*s,0,-200*s);
         gl.glEnd();
 
         // front - right driver door
         gl.glBegin(gl.GL_QUADS);
-        gl.glVertex3f(x,0,y);
-        gl.glVertex3f(x+300*s,0,y);
-        gl.glVertex3f(x+300*s,-200*s,y);
-        gl.glVertex3f(x,-200*s,y);
+        gl.glVertex3f(0,0,0);
+        gl.glVertex3f(300*s,0,0);
+        gl.glVertex3f(300*s,-200*s,0);
+        gl.glVertex3f(0,-200*s,0);
         gl.glEnd();
 
         // front - left driver door
         gl.glBegin(gl.GL_QUADS);
-        gl.glVertex3f(x,0,y-200*s);
-        gl.glVertex3f(x+300*s,0,y-200*s);
-        gl.glVertex3f(x+300*s,-200*s,y-200*s);
-        gl.glVertex3f(x,-200*s,y-200*s);
+        gl.glVertex3f(0,0,-200*s);
+        gl.glVertex3f(300*s,0,-200*s);
+        gl.glVertex3f(300*s,-200*s,-200*s);
+        gl.glVertex3f(0,-200*s,-200*s);
         gl.glEnd();
 
         // 1st wagon - right wall
         gl.glBegin(gl.GL_QUADS);
-        gl.glVertex3f(x+300*s,0,y);
-        gl.glVertex3f(x+1500*s,0,y);
-        gl.glVertex3f(x+1500*s,-600*s,y);
-        gl.glVertex3f(x+300*s,-600*s,y);
+        gl.glVertex3f(300*s,0,0);
+        gl.glVertex3f(1500*s,0,0);
+        gl.glVertex3f(1500*s,-600*s,0);
+        gl.glVertex3f(300*s,-600*s,0);
         gl.glEnd();
 
         // 1st wagon - left wall
         gl.glBegin(gl.GL_QUADS);
-        gl.glVertex3f(x+300*s,0,y-200*s);
-        gl.glVertex3f(x+1500*s,0,y-200*s);
-        gl.glVertex3f(x+1500*s,-600*s,y-200*s);
-        gl.glVertex3f(x+300*s,-600*s,y-200*s);
+        gl.glVertex3f(300*s,0,-200*s);
+        gl.glVertex3f(1500*s,0,-200*s);
+        gl.glVertex3f(1500*s,-600*s,-200*s);
+        gl.glVertex3f(300*s,-600*s,-200*s);
         gl.glEnd();
 
         // 1st wagon - roof
         gl.glBegin(gl.GL_QUADS);
-        gl.glVertex3f(x+300*s,-600*s,y);
-        gl.glVertex3f(x+1500*s,-600*s,y);
-        gl.glVertex3f(x+1500*s,-600*s,y-200*s);
-        gl.glVertex3f(x+300*s,-600*s,y-200*s);
+        gl.glVertex3f(300*s,-600*s,0);
+        gl.glVertex3f(1500*s,-600*s,0);
+        gl.glVertex3f(1500*s,-600*s,-200*s);
+        gl.glVertex3f(300*s,-600*s,-200*s);
         gl.glEnd();
 
         // 1st wagon - right windows
         for (int i=0; i<5; i++) {
             gl.glBegin(gl.GL_QUADS);
             gl.glColor3f(0.6f, 0.7f, 1f); // Light Blue
-            gl.glVertex3f(x+(350+200*i)*s,-200*s,y+0.1f*s);
+            gl.glVertex3f((350+200*i)*s,-200*s,0.1f*s);
             gl.glColor3f(0.4f, 0.6f, 0.9f); // Light Blue Tint 1
-            gl.glVertex3f(x+(500+200*i)*s,-200*s,y+0.1f*s);
+            gl.glVertex3f((500+200*i)*s,-200*s,0.1f*s);
             gl.glColor3f(0.4f, 0.8f, 1.0f); // Light Blue Tint 2
-            gl.glVertex3f(x+(500+200*i)*s,-500*s,y+0.1f*s);
+            gl.glVertex3f((500+200*i)*s,-500*s,0.1f*s);
             gl.glColor3f(0.6f, 0.7f, 1f); // Light Blue
-            gl.glVertex3f(x+(350+200*i)*s,-500*s,y+0.1f*s);
+            gl.glVertex3f((350+200*i)*s,-500*s,0.1f*s);
             gl.glEnd();
         }
 
@@ -335,13 +335,13 @@ public class Render implements GLEventListener{
         for (int i=0; i<5; i++) {
             gl.glBegin(gl.GL_QUADS);
             gl.glColor3f(0.6f, 0.7f, 1f); // Light Blue
-            gl.glVertex3f(x+(450+200*i)*s,-200*s,y-200.1f*s);
+            gl.glVertex3f((450+200*i)*s,-200*s,-200.1f*s);
             gl.glColor3f(0.4f, 0.6f, 0.9f); // Light Blue Tint 1
-            gl.glVertex3f(x+(600+200*i)*s,-200*s,y-200.1f*s);
+            gl.glVertex3f((600+200*i)*s,-200*s,-200.1f*s);
             gl.glColor3f(0.4f, 0.8f, 1.0f); // Light Blue Tint 2
-            gl.glVertex3f(x+(600+200*i)*s,-500*s,y-200.1f*s);
+            gl.glVertex3f((600+200*i)*s,-500*s,-200.1f*s);
             gl.glColor3f(0.6f, 0.7f, 1f); // Light Blue
-            gl.glVertex3f(x+(450+200*i)*s,-500*s,y-200.1f*s);
+            gl.glVertex3f((450+200*i)*s,-500*s,-200.1f*s);
             gl.glEnd();
         }
         gl.glPopMatrix();
